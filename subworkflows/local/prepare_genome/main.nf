@@ -80,6 +80,9 @@ workflow PREPARE_GENOME {
         else if (aligner == 'dragmap') {
             index_alignment = channel.fromPath(dragmap_in).map { index -> [[id: 'dragmap'], index] }.collect()
         }
+        else if (aligner == 'strobealign') {
+            index_alignment = channel.empty()
+        }
     }
     else {
         index_alignment = channel.empty()

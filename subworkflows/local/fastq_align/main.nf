@@ -8,6 +8,7 @@ include { BWAMEM2_MEM            } from '../../../modules/nf-core/bwamem2/mem/ma
 include { BWA_MEM as BWAMEM1_MEM } from '../../../modules/nf-core/bwa/mem/main'
 include { DRAGMAP_ALIGN          } from '../../../modules/nf-core/dragmap/align/main'
 include { SENTIEON_BWAMEM        } from '../../../modules/nf-core/sentieon/bwamem/main'
+include { STROBEALIGN            } from '../../../modules/local/strobealign/main'
 
 workflow FASTQ_ALIGN {
     take:
@@ -24,6 +25,7 @@ workflow FASTQ_ALIGN {
     // Only one of the following should be run
     BWAMEM1_MEM(reads, index, [[id:'no_fasta'], []], sort) // If aligner is bwa-mem
     BWAMEM2_MEM(reads, index, [[id:'no_fasta'], []], sort) // If aligner is bwa-mem2
+    STROBEALIGN(reads, fasta, sort) // If aligner is strobealign
     DRAGMAP_ALIGN(reads, index, [[id:'no_fasta'], []], sort) // If aligner is dragmap
     // The sentieon-bwamem-module does sorting as part of the conversion from sam to bam.
     SENTIEON_BWAMEM(reads, index, fasta, fasta_fai) // If aligner is sentieon-bwamem
@@ -33,6 +35,7 @@ workflow FASTQ_ALIGN {
     bam = channel.empty()
     bam = bam.mix(BWAMEM1_MEM.out.bam)
     bam = bam.mix(BWAMEM2_MEM.out.bam)
+    bam = bam.mix(STROBEALIGN.out.bam)
     bam = bam.mix(DRAGMAP_ALIGN.out.bam)
     bam = bam.mix(SENTIEON_BWAMEM.out.bam_and_bai.map{ meta, bam_file, _bai -> [ meta, bam_file ] })
 
